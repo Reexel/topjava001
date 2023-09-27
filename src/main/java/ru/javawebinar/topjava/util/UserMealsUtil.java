@@ -27,6 +27,14 @@ public class UserMealsUtil {
 //        System.out.println(filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
     }
 
+    /**
+     * Found dishes with calculate calories
+     * @param meals
+     * @param startTime
+     * @param endTime
+     * @param caloriesPerDay
+     * @return
+     */
     public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
 
         List<UserMealWithExcess> notExceedMeals = new ArrayList<>();
