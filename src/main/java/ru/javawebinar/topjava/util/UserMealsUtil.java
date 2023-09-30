@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.util.Arrays;
 import java.util.*;
+import java.time.format.DateTimeFormatter;
 
 public class UserMealsUtil {
     public static void main(String[] args) {
@@ -37,36 +38,33 @@ public class UserMealsUtil {
      */
     public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
 
-        List<UserMealWithExcess> notExceedMeals = new ArrayList<>();
-        List<UserMealWithExcess> exceedMeals = new ArrayList<>();
-        int calories = 0;
+        List<UserMealWithExcess> checkExceedMeals = new ArrayList<>();
+        HashMap<String, Integer> daysWithCalories = new HashMap<>();
+        int calories;
 
         for(UserMeal meal: meals) {
-            if(meal.getDateTime().toLocalTime().isAfter(startTime)
-                    && meal.getDateTime().toLocalTime().isBefore(endTime)) {
-                calories = meal.getCalories();
-                notExceedMeals.add(
+            calories = 0;
+            String key = meal.getDateTime().toLocalDate().toString();
+            if(daysWithCalories.containsKey(key)) {
+                calories += daysWithCalories.get(key);
+            }
+
+            daysWithCalories.put(key, calories + meal.getCalories());
+        }
+
+        for(UserMeal meal: meals) {
+            if(TimeUtil.isBetweenHalfOpen(meal.getDateTime().toLocalTime(), startTime, endTime)) {
+                checkExceedMeals.add(
                     new UserMealWithExcess(
                             meal.getDateTime(),
                             meal.getDescription(),
                             meal.getCalories(),
-                            false
+                            daysWithCalories.get(meal.getDateTime().toLocalDate().toString()) > caloriesPerDay
                     ));
-                exceedMeals.add(
-                        new UserMealWithExcess(
-                                meal.getDateTime(),
-                                meal.getDescription(),
-                                meal.getCalories(),
-                                true
-                        ));
             }
         }
 
-        if(calories > caloriesPerDay) {
-            return exceedMeals;
-        } else {
-            return notExceedMeals;
-        }
+        return checkExceedMeals;
     }
 
     public static List<UserMealWithExcess> filteredByStreams(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
